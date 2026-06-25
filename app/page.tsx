@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 const dossierCards = [
   {
     index: "01",
@@ -117,12 +119,12 @@ export default function HomePage() {
               </p>
 
               <div className="mt-10 flex flex-col gap-3 sm:flex-row">
-                <a
-                  href="#primary-dossier"
+                <Link
+                  href="/archive"
                   className="inline-flex min-h-12 items-center justify-center rounded-sm border border-[#d1b79a]/45 bg-[#d1b79a]/12 px-6 py-3 text-sm font-medium uppercase tracking-[0.28em] text-[#f8f3eb] transition duration-200 ease-out hover:border-[#d1b79a]/70 hover:bg-[#d1b79a]/18 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#dbc3aa] focus-visible:ring-offset-2 focus-visible:ring-offset-[#05070b]"
                 >
                   Open Primary Record
-                </a>
+                </Link>
                 <a
                   href="#recovered-index"
                   className="inline-flex min-h-12 items-center justify-center rounded-sm border border-white/14 bg-white/[0.02] px-6 py-3 text-sm font-medium uppercase tracking-[0.28em] text-[#ddd5c9] transition duration-200 ease-out hover:border-white/28 hover:bg-white/[0.05] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c7d1df] focus-visible:ring-offset-2 focus-visible:ring-offset-[#05070b]"
