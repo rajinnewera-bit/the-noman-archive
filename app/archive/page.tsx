@@ -8,6 +8,7 @@ const archiveCollections = [
     availability: "Access Pending",
     detail: "Sequential files exist, but several opening records remain sealed.",
     meta: "12 indexed / 03 withheld",
+    href: "/archive/chapters",
   },
   {
     id: "02",
@@ -16,14 +17,16 @@ const archiveCollections = [
     availability: "Available Soon",
     detail: "Loose excerpts, voice remnants, and incomplete field notes remain under review.",
     meta: "31 fragments / unstable chronology",
+    href: null,
   },
   {
     id: "03",
     title: "Character Dossiers",
-    status: "Sealed",
+    status: "Partial Clearance",
     availability: "Access Pending",
-    detail: "Cross-referenced identities exist, but attribution confidence is still compromised.",
-    meta: "09 dossiers / 04 redacted",
+    detail: "One confidential subject file has surfaced; broader identity records remain restricted.",
+    meta: "01 file visible / others redacted",
+    href: "/archive/subject/nm-01",
   },
   {
     id: "04",
@@ -32,6 +35,7 @@ const archiveCollections = [
     availability: "Available Soon",
     detail: "Temporal reconstruction is incomplete. Several events repeat across conflicting dates.",
     meta: "Chronology rebuild in progress",
+    href: null,
   },
   {
     id: "05",
@@ -40,6 +44,7 @@ const archiveCollections = [
     availability: "Access Pending",
     detail: "Physical records, transcripts, and anomaly traces require elevated review.",
     meta: "17 exhibits / restricted circulation",
+    href: null,
   },
   {
     id: "06",
@@ -48,6 +53,7 @@ const archiveCollections = [
     availability: "Unavailable",
     detail: "Catalog references survive, but the original files do not. Cause remains unresolved.",
     meta: "08 gaps / source missing",
+    href: null,
   },
 ] as const;
 
@@ -200,35 +206,73 @@ export default function ArchiveIndexPage() {
 
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {archiveCollections.map((collection) => (
-              <article
-                key={collection.title}
-                className="group relative overflow-hidden rounded-sm border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.045),rgba(255,255,255,0.02))] p-5 shadow-[0_10px_40px_rgba(0,0,0,0.22)] transition duration-300 ease-out hover:border-white/16 hover:bg-white/[0.045]"
-              >
-                <div
-                  aria-hidden="true"
-                  className="pointer-events-none absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.38),transparent)] opacity-60"
-                />
-                <div className="flex items-start justify-between gap-4">
-                  <p className="font-mono text-[0.7rem] uppercase tracking-[0.3em] text-[#8f98a4]">
-                    {collection.title}
+              collection.href ? (
+                <Link
+                  key={collection.title}
+                  href={collection.href}
+                  className="group relative overflow-hidden rounded-sm border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.045),rgba(255,255,255,0.02))] p-5 shadow-[0_10px_40px_rgba(0,0,0,0.22)] transition duration-300 ease-out hover:border-white/16 hover:bg-white/[0.045] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#dbc3aa] focus-visible:ring-offset-2 focus-visible:ring-offset-[#05070b]"
+                >
+                  <div
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.38),transparent)] opacity-60"
+                  />
+                  <div className="flex items-start justify-between gap-4">
+                    <p className="font-mono text-[0.7rem] uppercase tracking-[0.3em] text-[#8f98a4]">
+                      {collection.title}
+                    </p>
+                    <span className="font-mono text-[0.68rem] uppercase tracking-[0.3em] text-[#8e8172]">
+                      {collection.id}
+                    </span>
+                  </div>
+                  <p className="mt-5 text-lg font-medium uppercase tracking-[0.18em] text-[#f1eadf] sm:text-xl">
+                    {collection.status}
                   </p>
-                  <span className="font-mono text-[0.68rem] uppercase tracking-[0.3em] text-[#8e8172]">
-                    {collection.id}
-                  </span>
-                </div>
-                <p className="mt-5 text-lg font-medium uppercase tracking-[0.18em] text-[#f1eadf] sm:text-xl">
-                  {collection.status}
-                </p>
-                <p className="mt-2 font-mono text-[0.68rem] uppercase tracking-[0.3em] text-[#b7ad9f]">
-                  {collection.availability}
-                </p>
-                <p className="mt-4 text-sm leading-7 text-[#b7ae9f]">
-                  {collection.detail}
-                </p>
-                <div className="mt-6 border-t border-dashed border-white/10 pt-4 font-mono text-[0.68rem] uppercase tracking-[0.28em] text-[#8f98a4]">
-                  {collection.meta}
-                </div>
-              </article>
+                  <p className="mt-2 font-mono text-[0.68rem] uppercase tracking-[0.3em] text-[#b7ad9f]">
+                    {collection.availability}
+                  </p>
+                  <p className="mt-4 text-sm leading-7 text-[#b7ae9f]">
+                    {collection.detail}
+                  </p>
+                  <div className="mt-6 flex items-center justify-between gap-4 border-t border-dashed border-white/10 pt-4">
+                    <span className="font-mono text-[0.68rem] uppercase tracking-[0.28em] text-[#8f98a4]">
+                      {collection.meta}
+                    </span>
+                    <span className="font-mono text-[0.68rem] uppercase tracking-[0.28em] text-[#d7cec2]">
+                      Inspect
+                    </span>
+                  </div>
+                </Link>
+              ) : (
+                <article
+                  key={collection.title}
+                  className="group relative overflow-hidden rounded-sm border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.045),rgba(255,255,255,0.02))] p-5 shadow-[0_10px_40px_rgba(0,0,0,0.22)] transition duration-300 ease-out hover:border-white/16 hover:bg-white/[0.045]"
+                >
+                  <div
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.38),transparent)] opacity-60"
+                  />
+                  <div className="flex items-start justify-between gap-4">
+                    <p className="font-mono text-[0.7rem] uppercase tracking-[0.3em] text-[#8f98a4]">
+                      {collection.title}
+                    </p>
+                    <span className="font-mono text-[0.68rem] uppercase tracking-[0.3em] text-[#8e8172]">
+                      {collection.id}
+                    </span>
+                  </div>
+                  <p className="mt-5 text-lg font-medium uppercase tracking-[0.18em] text-[#f1eadf] sm:text-xl">
+                    {collection.status}
+                  </p>
+                  <p className="mt-2 font-mono text-[0.68rem] uppercase tracking-[0.3em] text-[#b7ad9f]">
+                    {collection.availability}
+                  </p>
+                  <p className="mt-4 text-sm leading-7 text-[#b7ae9f]">
+                    {collection.detail}
+                  </p>
+                  <div className="mt-6 border-t border-dashed border-white/10 pt-4 font-mono text-[0.68rem] uppercase tracking-[0.28em] text-[#8f98a4]">
+                    {collection.meta}
+                  </div>
+                </article>
+              )
             ))}
           </div>
         </div>
