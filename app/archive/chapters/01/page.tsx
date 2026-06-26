@@ -1,6 +1,11 @@
 import Link from "next/link";
 
 import { ArchivePath } from "@/components/archive-path";
+import {
+  chapter01,
+  type ChapterPage,
+  type ChapterParagraph,
+} from "@/content/chapters/chapter01";
 
 const recoveryMetadata = [
   { label: "Recovery Date", value: "22 FEB 2008" },
@@ -12,20 +17,39 @@ const recoveryMetadata = [
 ] as const;
 
 const evidenceStamps = [
-  "Recovered",
-  "Partial Scan",
-  "Restricted Copy",
+  ["Recovered", "Partial Scan"],
+  ["Restricted Copy", "Forensic Copy"],
+  ["Authenticity Under Review"],
 ] as const;
 
-const continuationStamps = [
-  "Forensic Copy",
-  "Authenticity Under Review",
-] as const;
+const marginNotes = {
+  "01-A": [
+    "Ink pressure rises after self-reference.",
+    "Room geometry changes before any explicit naming.",
+  ],
+  "01-B": [
+    "Name occurrence corresponds with scan interference.",
+    "Caller identity omitted from adjacent witness copy.",
+  ],
+  "01-C": [
+    "Direct self-identification increases coherence.",
+    "Final lines remain intact despite lower-edge abrasion.",
+  ],
+} as const;
 
-const marginNotes = [
-  "Ink pressure rises after self-reference.",
-  "Name occurrence corresponds with scan interference.",
-  "Cross-check emotional shift against witness statement B.",
+const interPageRecords = [
+  {
+    after: "01-A",
+    ref: "RECOVERY INTERRUPTION / 01-A",
+    title: "Lower sheet torn during recovery.",
+    body: "The missing line was not restored. Adjacent fibers indicate loss after water damage, before catalog drying.",
+  },
+  {
+    after: "01-B",
+    ref: "FIELD NOTE / 01-B",
+    title: "First direct naming event logged.",
+    body: "Tone coherence rises immediately after self-reference. Review team flagged the section for containment correlation.",
+  },
 ] as const;
 
 const archiveAnnotations = [
@@ -60,6 +84,125 @@ function RedactionBar({ width }: { width: string }) {
       aria-label="redacted"
       className={`mx-1 inline-block h-[0.9em] ${width} rounded-[2px] bg-[#16110b]/90 align-middle`}
     />
+  );
+}
+
+function renderParagraph(paragraph: ChapterParagraph, index: number) {
+  if (paragraph.kind === "text") {
+    return (
+      <p key={`${paragraph.kind}-${index}`}>
+        {paragraph.text}
+      </p>
+    );
+  }
+
+  return (
+    <p key={`${paragraph.kind}-${index}`}>
+      {paragraph.before}
+      {paragraph.redactions.map((redaction, redactionIndex) => (
+        <RedactionBar
+          key={`${redaction.width}-${redactionIndex}`}
+          width={redaction.width}
+        />
+      ))}
+      {paragraph.after}
+    </p>
+  );
+}
+
+function NotebookPage({
+  page,
+  pageIndex,
+}: {
+  page: ChapterPage;
+  pageIndex: number;
+}) {
+  const notes = marginNotes[page.id as keyof typeof marginNotes] ?? [];
+  const stamps = evidenceStamps[pageIndex] ?? [];
+
+  return (
+    <article className="relative overflow-hidden rounded-sm border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.045),rgba(255,255,255,0.02))] p-4 shadow-[0_22px_90px_rgba(0,0,0,0.38)] sm:p-6 lg:p-8">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.4),transparent)]"
+      />
+
+      <div className="relative overflow-hidden rounded-sm border border-[#9b8a74]/24 bg-[linear-gradient(180deg,rgba(222,210,190,0.96),rgba(192,177,156,0.94))] p-5 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06),0_24px_60px_rgba(0,0,0,0.22)] sm:p-7 lg:p-9">
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 bg-[radial-gradient(circle_at_12%_16%,rgba(255,255,255,0.36),transparent_14%),radial-gradient(circle_at_84%_14%,rgba(255,255,255,0.16),transparent_12%),radial-gradient(circle_at_18%_86%,rgba(99,80,58,0.12),transparent_18%),linear-gradient(180deg,rgba(255,255,255,0.18),transparent_18%,rgba(100,82,61,0.08)_100%)]"
+        />
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 opacity-[0.18] bg-[repeating-linear-gradient(180deg,rgba(52,40,29,0.16)_0,rgba(52,40,29,0.16)_1px,transparent_1px,transparent_4px)]"
+        />
+        <div
+          aria-hidden="true"
+          className="absolute inset-y-0 left-0 w-6 bg-[linear-gradient(90deg,rgba(118,96,72,0.3),transparent)]"
+        />
+        <div
+          aria-hidden="true"
+          className="absolute right-0 top-24 h-36 w-8 bg-[linear-gradient(270deg,rgba(87,69,47,0.25),transparent)]"
+        />
+
+        <div className="absolute right-5 top-5 flex flex-col items-end gap-3">
+          {stamps.map((stamp, stampIndex) => (
+            <span
+              key={stamp}
+              className={`rounded-sm border border-[#7d2c2c]/34 bg-[#b57e7e]/10 px-3 py-1 text-[0.64rem] font-semibold uppercase tracking-[0.28em] text-[#6f1d1d]/76 ${
+                stampIndex % 2 === 0 ? "rotate-[6deg]" : "rotate-[-4deg]"
+              }`}
+            >
+              {stamp}
+            </span>
+          ))}
+        </div>
+
+        <div className="relative">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-dashed border-[#6f5d4a]/24 pb-4 font-mono text-[0.64rem] uppercase tracking-[0.28em] text-[#5f5244]/74">
+            <span>scan sheet / {page.id}</span>
+            <span>evidence marker e-14</span>
+            <span>clerk reference 7c-113</span>
+          </div>
+
+          <div className="mt-6 grid gap-8 lg:grid-cols-[minmax(0,1fr)_13rem]">
+            <div className="space-y-6 text-[0.98rem] leading-8 text-[#2e261c]/82 sm:text-[1.04rem]">
+              {page.paragraphs.map(renderParagraph)}
+            </div>
+
+            <aside className="space-y-4">
+              <div className="rounded-sm border border-[#6f5d4a]/28 bg-white/18 p-4 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)]">
+                <p className="font-mono text-[0.62rem] uppercase tracking-[0.28em] text-[#5f5244]/74">
+                  margin notation / inv. hand
+                </p>
+                <div className="mt-4 space-y-4 text-[0.82rem] italic leading-6 text-[#44372a]/78">
+                  {notes.map((note, noteIndex) => (
+                    <p
+                      key={note}
+                      className={
+                        noteIndex % 2 === 0 ? "rotate-[-2deg]" : "rotate-[1.5deg]"
+                      }
+                    >
+                      {note}
+                    </p>
+                  ))}
+                </div>
+              </div>
+
+              <div className="rounded-sm border border-[#6f5d4a]/28 bg-[#89745c]/10 p-4 font-mono text-[0.66rem] uppercase tracking-[0.28em] text-[#5c4d3f]/78">
+                <p>marker / {page.id}</p>
+                <p className="mt-3 border-t border-dashed border-[#6f5d4a]/24 pt-3">
+                  ref / edge fiber anomaly
+                </p>
+                <p className="mt-3 border-t border-dashed border-[#6f5d4a]/24 pt-3">
+                  ref / line dropout cluster
+                </p>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </div>
+    </article>
   );
 }
 
@@ -119,7 +262,7 @@ export default function RecoveredDiaryPage() {
                 Evidence Layer / Notebook Fragment 01
               </p>
               <h1 className="mt-6 text-[2.8rem] font-semibold uppercase tracking-[0.22em] text-[#f7f2ea] sm:text-[4.4rem] md:text-[5.2rem] lg:text-[6.2rem]">
-                Recovered Diary
+                {chapter01.title}
               </h1>
               <p className="mt-5 max-w-2xl text-base uppercase tracking-[0.2em] text-[#d9d0c4] sm:text-lg">
                 Personal writing surfaced within sealed evidence material.
@@ -163,10 +306,10 @@ export default function RecoveredDiaryPage() {
                 <div className="space-y-4 py-5">
                   <div className="flex items-baseline justify-between gap-4 border-b border-dashed border-white/10 pb-3">
                     <span className="font-mono text-[0.68rem] uppercase tracking-[0.28em] text-[#8f98a4]">
-                      Page Integrity
+                      Page Count
                     </span>
                     <span className="text-sm uppercase tracking-[0.24em] text-[#dfd5c8]">
-                      fractured
+                      03 recovered leaves
                     </span>
                   </div>
                   <div className="flex items-baseline justify-between gap-4 border-b border-dashed border-white/10 pb-3">
@@ -188,8 +331,8 @@ export default function RecoveredDiaryPage() {
                 </div>
 
                 <p className="max-w-sm text-sm leading-7 text-[#b5ab9d]">
-                  First-person language survives. The surrounding archive bends
-                  around it.
+                  The text remains primary. The archive records only its
+                  condition.
                 </p>
               </div>
             </article>
@@ -199,340 +342,118 @@ export default function RecoveredDiaryPage() {
 
       <section className="relative border-b border-white/10 px-6 py-14 sm:px-8 lg:px-12 lg:py-18">
         <div className="mx-auto max-w-7xl">
-          <article className="relative overflow-hidden rounded-sm border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.045),rgba(255,255,255,0.02))] p-4 shadow-[0_22px_90px_rgba(0,0,0,0.38)] sm:p-6 lg:p-8">
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.4),transparent)]"
-            />
-            <div
-              aria-hidden="true"
-              className="absolute left-0 top-[18%] h-32 w-10 bg-[linear-gradient(90deg,rgba(5,7,11,0.82),transparent)]"
-            />
-            <div
-              aria-hidden="true"
-              className="absolute bottom-[12%] right-0 h-36 w-12 bg-[linear-gradient(270deg,rgba(5,7,11,0.86),transparent)]"
-            />
-            <div
-              aria-hidden="true"
-              className="absolute left-6 top-20 h-10 w-16 -rotate-[14deg] rounded-full bg-[#05070b]/60 blur-md"
-            />
-            <div
-              aria-hidden="true"
-              className="absolute bottom-18 right-10 h-12 w-24 rotate-[8deg] rounded-full bg-[#05070b]/55 blur-lg"
-            />
-
-            <div className="relative">
-              <div className="mb-6 flex flex-wrap items-center justify-between gap-4 border-b border-dashed border-white/10 pb-4 font-mono text-[0.66rem] uppercase tracking-[0.28em] text-[#8f98a4]">
-                <span>Scan Sheet / 01-A</span>
-                <span>Evidence Marker E-14</span>
-                <span>Clerk Reference 7C-113</span>
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            {recoveryMetadata.map((item) => (
+              <div
+                key={item.label}
+                className="rounded-sm border border-white/8 bg-[#0b0f14]/72 px-4 py-4"
+              >
+                <dt className="font-mono text-[0.66rem] uppercase tracking-[0.3em] text-[#8f98a4]">
+                  {item.label}
+                </dt>
+                <dd className="mt-3 text-sm uppercase tracking-[0.18em] text-[#e1d7ca]">
+                  {item.value}
+                </dd>
               </div>
-
-              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                {recoveryMetadata.map((item) => (
-                  <div
-                    key={item.label}
-                    className="rounded-sm border border-white/8 bg-[#0b0f14]/72 px-4 py-4"
-                  >
-                    <dt className="font-mono text-[0.66rem] uppercase tracking-[0.3em] text-[#8f98a4]">
-                      {item.label}
-                    </dt>
-                    <dd className="mt-3 text-sm uppercase tracking-[0.18em] text-[#e1d7ca]">
-                      {item.value}
-                    </dd>
-                  </div>
-                ))}
-              </div>
-
-              <div className="relative mt-8 overflow-hidden rounded-sm border border-[#9b8a74]/24 bg-[linear-gradient(180deg,rgba(222,210,190,0.96),rgba(192,177,156,0.94))] p-5 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06),0_24px_60px_rgba(0,0,0,0.22)] sm:p-7 lg:p-9">
-                <div
-                  aria-hidden="true"
-                  className="absolute inset-0 bg-[radial-gradient(circle_at_12%_16%,rgba(255,255,255,0.36),transparent_14%),radial-gradient(circle_at_84%_14%,rgba(255,255,255,0.16),transparent_12%),radial-gradient(circle_at_18%_86%,rgba(99,80,58,0.12),transparent_18%),linear-gradient(180deg,rgba(255,255,255,0.18),transparent_18%,rgba(100,82,61,0.08)_100%)]"
-                />
-                <div
-                  aria-hidden="true"
-                  className="absolute inset-0 opacity-[0.18] bg-[repeating-linear-gradient(180deg,rgba(52,40,29,0.16)_0,rgba(52,40,29,0.16)_1px,transparent_1px,transparent_4px)]"
-                />
-                <div
-                  aria-hidden="true"
-                  className="absolute inset-y-0 left-0 w-6 bg-[linear-gradient(90deg,rgba(118,96,72,0.3),transparent)]"
-                />
-                <div
-                  aria-hidden="true"
-                  className="absolute inset-x-[18%] top-0 h-5 bg-[linear-gradient(180deg,rgba(255,255,255,0.16),transparent)]"
-                />
-                <div
-                  aria-hidden="true"
-                  className="absolute right-0 top-24 h-36 w-8 bg-[linear-gradient(270deg,rgba(87,69,47,0.25),transparent)]"
-                />
-                <div
-                  aria-hidden="true"
-                  className="absolute left-[-2%] top-[28%] h-14 w-14 rotate-[18deg] bg-[#20180f]/16 blur-md"
-                />
-                <div
-                  aria-hidden="true"
-                  className="absolute bottom-[26%] right-[-1%] h-20 w-16 -rotate-[12deg] bg-[#20180f]/18 blur-md"
-                />
-
-                <div className="absolute right-5 top-5 flex flex-col items-end gap-3">
-                  {evidenceStamps.map((stamp, index) => (
-                    <span
-                      key={stamp}
-                      className={`rounded-sm border px-3 py-1 text-[0.66rem] font-semibold uppercase tracking-[0.28em] text-[#6f1d1d]/78 ${
-                        index === 0
-                          ? "rotate-[6deg] border-[#7d2c2c]/40 bg-[#b57e7e]/10"
-                          : "rotate-[-4deg] border-[#7d2c2c]/30 bg-[#b57e7e]/8"
-                      }`}
-                    >
-                      {stamp}
-                    </span>
-                  ))}
-                </div>
-
-                <div className="relative grid gap-8 lg:grid-cols-[minmax(0,1fr)_13rem]">
-                  <div className="max-w-3xl">
-                    <p className="font-mono text-[0.68rem] uppercase tracking-[0.3em] text-[#5e5043]/78">
-                      notebook extract / page one / source stabilized
-                    </p>
-                    <div className="mt-6 space-y-6 text-[0.98rem] leading-8 text-[#2e261c]/82 sm:text-[1.04rem]">
-                      <p>
-                        I woke before the knock again. The corridor was quiet,
-                        but I could hear the latch breathing as if someone stood
-                        outside waiting for me to remember why the door should
-                        stay locked.
-                      </p>
-                      <p className="opacity-78">
-                        There is a name written on the first page and every
-                        time I look at it the letters seem to belong to someone
-                        else. I keep tracing them anyway, as though the hand
-                        might admit what the mind will not.
-                      </p>
-                      <p>
-                        By noon the room had changed shape for the third time.
-                        The window was where the wardrobe should have been and
-                        the mirror refused to keep me in it longer than a second.
-                        I wrote down the order of the furniture and then lost
-                        the paper with the order on it.
-                      </p>
-
-                      <div className="rounded-sm border border-dashed border-[#6e5a46]/26 bg-[#8a745a]/10 px-4 py-4 text-[0.82rem] uppercase tracking-[0.24em] text-[#5e5043]/72">
-                        paragraph loss detected / lower sheet torn during recovery
-                      </div>
-
-                      <p className="opacity-70">
-                        The woman downstairs called me by a different name this
-                        morning. I answered before I could stop myself. Later I
-                        found the sound of my own reply written in the margin:
-                        <RedactionBar width="w-24" />
-                        <RedactionBar width="w-16" />
-                        as if someone listening had decided that was the only
-                        part worth keeping.
-                      </p>
-                    </div>
-                  </div>
-
-                  <aside className="space-y-4">
-                    <div className="rounded-sm border border-[#6f5d4a]/28 bg-white/18 p-4 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)]">
-                      <p className="font-mono text-[0.62rem] uppercase tracking-[0.28em] text-[#5f5244]/74">
-                        margin notation / inv. hand
-                      </p>
-                      <div className="mt-4 space-y-4 text-[0.82rem] italic leading-6 text-[#44372a]/78">
-                        {marginNotes.map((note, index) => (
-                          <p
-                            key={note}
-                            className={
-                              index % 2 === 0 ? "rotate-[-2deg]" : "rotate-[1.5deg]"
-                            }
-                          >
-                            {note}
-                          </p>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="rounded-sm border border-[#6f5d4a]/28 bg-[#89745c]/10 p-4 font-mono text-[0.66rem] uppercase tracking-[0.28em] text-[#5c4d3f]/78">
-                      <p>Marker / Fig. A</p>
-                      <p className="mt-3 border-t border-dashed border-[#6f5d4a]/24 pt-3">
-                        Ref / edge fiber anomaly
-                      </p>
-                      <p className="mt-3 border-t border-dashed border-[#6f5d4a]/24 pt-3">
-                        Ref / line dropout cluster
-                      </p>
-                    </div>
-                  </aside>
-                </div>
-
-                <div className="relative mt-8 border-t border-dashed border-[#6f5d4a]/26 pt-5">
-                  <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_13rem]">
-                    <div className="text-sm leading-7 text-[#342a20]/74">
-                      Archive annotation: subject-oriented language increases in
-                      clarity whenever the writer describes enclosed spaces,
-                      thresholds, or his own reflection.
-                    </div>
-                    <div className="font-mono text-[0.64rem] uppercase tracking-[0.28em] text-[#5f5244]/72 sm:text-right">
-                      review ref / 01-a / sheet retained
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </article>
+            ))}
+          </div>
         </div>
       </section>
 
-      <section className="relative border-b border-white/10 px-6 py-14 sm:px-8 lg:px-12 lg:py-18">
-        <div className="mx-auto grid max-w-7xl gap-6 lg:grid-cols-[1.08fr_0.92fr]">
-          <article className="relative overflow-hidden rounded-sm border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.045),rgba(255,255,255,0.02))] p-4 shadow-[0_22px_90px_rgba(0,0,0,0.38)] sm:p-6">
-            <div
-              aria-hidden="true"
-              className="absolute inset-y-0 left-0 w-8 bg-[linear-gradient(90deg,rgba(5,7,11,0.82),transparent)]"
-            />
-            <div
-              aria-hidden="true"
-              className="absolute right-4 top-4 h-10 w-20 rotate-[10deg] bg-[#05070b]/35 blur-md"
-            />
+      <section className="relative px-6 py-14 sm:px-8 lg:px-12 lg:py-18">
+        <div className="mx-auto max-w-7xl space-y-8">
+          {chapter01.pages.map((page, index) => (
+            <div key={page.id} className="space-y-8">
+              <NotebookPage page={page} pageIndex={index} />
 
-            <div className="relative overflow-hidden rounded-sm border border-[#9b8a74]/24 bg-[linear-gradient(180deg,rgba(219,205,184,0.96),rgba(184,167,145,0.94))] p-5 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)] sm:p-7 lg:p-9">
-              <div
-                aria-hidden="true"
-                className="absolute inset-0 bg-[radial-gradient(circle_at_10%_18%,rgba(255,255,255,0.34),transparent_14%),radial-gradient(circle_at_86%_16%,rgba(255,255,255,0.16),transparent_12%),linear-gradient(180deg,rgba(255,255,255,0.12),transparent_18%,rgba(99,81,60,0.1)_100%)]"
-              />
-              <div
-                aria-hidden="true"
-                className="absolute inset-0 opacity-[0.16] bg-[repeating-linear-gradient(180deg,rgba(52,40,29,0.16)_0,rgba(52,40,29,0.16)_1px,transparent_1px,transparent_4px)]"
-              />
-              <div
-                aria-hidden="true"
-                className="absolute bottom-0 left-[24%] h-7 w-32 -translate-x-1/2 bg-[radial-gradient(circle_at_50%_0,rgba(5,7,11,0.72),transparent_72%)]"
-              />
-              <div
-                aria-hidden="true"
-                className="absolute right-0 top-[30%] h-20 w-8 bg-[linear-gradient(270deg,rgba(89,72,52,0.3),transparent)]"
-              />
-
-              <div className="absolute right-5 top-5 flex flex-col items-end gap-3">
-                {continuationStamps.map((stamp, index) => (
-                  <span
-                    key={stamp}
-                    className={`rounded-sm border border-[#7d2c2c]/34 bg-[#b57e7e]/10 px-3 py-1 text-[0.64rem] font-semibold uppercase tracking-[0.28em] text-[#6f1d1d]/76 ${
-                      index === 0 ? "rotate-[-5deg]" : "rotate-[7deg]"
-                    }`}
-                  >
-                    {stamp}
-                  </span>
-                ))}
-              </div>
-
-              <div className="relative">
-                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-dashed border-[#6f5d4a]/24 pb-4 font-mono text-[0.64rem] uppercase tracking-[0.28em] text-[#5f5244]/74">
-                  <span>continuation sheet / 01-b</span>
-                  <span>reference no. nm-01-rd-2</span>
-                </div>
-
-                <div className="mt-6 space-y-6 text-[0.98rem] leading-8 text-[#2d261c]/82 sm:text-[1.04rem]">
-                  <p>
-                    Mother used to say memory was a room, and rooms can be
-                    entered in the wrong order. I think I entered mine
-                    backwards. I keep arriving after things have already
-                    frightened me.
-                  </p>
-                  <p className="opacity-76">
-                    I found mud on the inside of the sink. I washed my hands
-                    until the water went cold and still it felt like I had come
-                    home carrying a place I had never visited.
-                  </p>
-                  <p>
-                    If this is still mine, if I am still Noman, then someone
-                    has been editing the days behind me. They leave the shape of
-                    the hours in place and take the reasons out. What remains is
-                    enough to live through, not enough to trust.
-                  </p>
-                  <p className="opacity-72">
-                    Tonight I pushed the wardrobe against the door again. I
-                    told myself it was for the sound in the corridor. It may
-                    have been for the sound of my own voice repeating back from
-                    the dark.
-                  </p>
-                </div>
-
-                <div className="mt-8 grid gap-4 sm:grid-cols-[minmax(0,1fr)_14rem]">
-                  <div className="rounded-sm border border-[#6f5d4a]/26 bg-[#896f54]/10 px-4 py-4 text-sm leading-7 text-[#382d22]/72">
-                    Lower margin heavily abraded. Final lines are either missing
-                    or intentionally removed before recovery.
-                  </div>
-                  <div className="rounded-sm border border-[#6f5d4a]/26 bg-white/14 p-4">
-                    <p className="font-mono text-[0.62rem] uppercase tracking-[0.28em] text-[#5f5244]/72">
-                      field note
-                    </p>
-                    <p className="mt-3 rotate-[1.5deg] text-[0.82rem] italic leading-6 text-[#44372a]/76">
-                      First direct naming event. Tone becomes intimate and more
-                      coherent immediately afterward.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </article>
-
-          <div className="space-y-6">
-            <article className="rounded-sm border border-white/10 bg-white/[0.03] p-6 shadow-[0_14px_60px_rgba(0,0,0,0.26)] sm:p-8">
-              <p className="font-mono text-[0.7rem] uppercase tracking-[0.34em] text-[#8f98a4]">
-                Archive Annotations
-              </p>
-            <h2 className="mt-4 text-2xl font-semibold text-[#f3ede4] sm:text-3xl">
-              Review notes cluster around the voice itself.
-            </h2>
-              <div className="mt-6 space-y-4">
-                {archiveAnnotations.map((note) => (
+              {interPageRecords
+                .filter((record) => record.after === page.id)
+                .map((record) => (
                   <article
-                    key={note.ref}
-                    className="rounded-sm border border-white/8 bg-[#0b0f14]/70 p-4"
+                    key={record.ref}
+                    className="rounded-sm border border-white/10 bg-white/[0.03] p-5 shadow-[0_14px_50px_rgba(0,0,0,0.24)] sm:p-6"
                   >
-                    <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-dashed border-white/10 pb-4">
                       <p className="font-mono text-[0.66rem] uppercase tracking-[0.28em] text-[#8f98a4]">
-                        {note.ref}
+                        {record.ref}
                       </p>
-                      <p className="text-sm uppercase tracking-[0.2em] text-[#e1d7ca]">
-                        {note.title}
+                      <p className="font-mono text-[0.66rem] uppercase tracking-[0.28em] text-[#8e8172]">
+                        archive note
                       </p>
                     </div>
+                    <p className="mt-4 text-sm uppercase tracking-[0.2em] text-[#e1d7ca]">
+                      {record.title}
+                    </p>
                     <p className="mt-3 text-sm leading-7 text-[#b7ae9f]">
-                      {note.body}
+                      {record.body}
                     </p>
                   </article>
                 ))}
-              </div>
-            </article>
+            </div>
+          ))}
+        </div>
+      </section>
 
-            <article className="rounded-sm border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.016))] p-6 sm:p-8">
-              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-dashed border-white/10 pb-4">
-                <p className="text-sm uppercase tracking-[0.22em] text-[#e2d7ca]">
-                  Custody Notice
-                </p>
-                <p className="font-mono text-[0.68rem] uppercase tracking-[0.3em] text-[#8f98a4]">
-                  observer copy
-                </p>
-              </div>
-              <p className="pt-5 text-sm leading-7 text-[#b9b0a2] sm:text-[0.97rem]">
-                This is the first source that speaks from inside the event.
+      <section className="relative border-t border-white/10 px-6 py-14 sm:px-8 lg:px-12 lg:py-18">
+        <div className="mx-auto grid max-w-7xl gap-6 lg:grid-cols-[0.92fr_1.08fr]">
+          <article className="rounded-sm border border-white/10 bg-white/[0.03] p-6 shadow-[0_14px_60px_rgba(0,0,0,0.26)] sm:p-8">
+            <p className="font-mono text-[0.7rem] uppercase tracking-[0.34em] text-[#8f98a4]">
+              Archive Annotations
+            </p>
+            <h2 className="mt-4 text-2xl font-semibold text-[#f3ede4] sm:text-3xl">
+              Commentary remains external to the text.
+            </h2>
+            <div className="mt-6 space-y-4">
+              {archiveAnnotations.map((note) => (
+                <article
+                  key={note.ref}
+                  className="rounded-sm border border-white/8 bg-[#0b0f14]/70 p-4"
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <p className="font-mono text-[0.66rem] uppercase tracking-[0.28em] text-[#8f98a4]">
+                      {note.ref}
+                    </p>
+                    <p className="text-sm uppercase tracking-[0.2em] text-[#e1d7ca]">
+                      {note.title}
+                    </p>
+                  </div>
+                  <p className="mt-3 text-sm leading-7 text-[#b7ae9f]">
+                    {note.body}
+                  </p>
+                </article>
+              ))}
+            </div>
+          </article>
+
+          <article className="rounded-sm border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.016))] p-6 sm:p-8">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-dashed border-white/10 pb-4">
+              <p className="text-sm uppercase tracking-[0.22em] text-[#e2d7ca]">
+                Custody Notice
               </p>
+              <p className="font-mono text-[0.68rem] uppercase tracking-[0.3em] text-[#8f98a4]">
+                observer copy
+              </p>
+            </div>
+            <p className="pt-5 text-sm leading-7 text-[#b9b0a2] sm:text-[0.97rem]">
+              This material is preserved as evidence. The prose remains
+              untouched.
+            </p>
 
-              <div className="mt-8 flex flex-wrap gap-3">
-                <Link
-                  href="/archive/chapters"
-                  className="inline-flex min-h-11 items-center justify-center rounded-sm border border-white/12 bg-white/[0.03] px-5 py-3 text-sm uppercase tracking-[0.24em] text-[#d8cec1] transition hover:border-white/18 hover:bg-white/[0.045] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#dbc3aa] focus-visible:ring-offset-2 focus-visible:ring-offset-[#05070b]"
-                >
-                  Return to Records
-                </Link>
-                <Link
-                  href="/archive/subject/nm-01"
-                  className="inline-flex min-h-11 items-center justify-center rounded-sm border border-[#d1b79a]/28 bg-[#d1b79a]/10 px-5 py-3 text-sm uppercase tracking-[0.24em] text-[#f4ede3] transition hover:border-[#d1b79a]/42 hover:bg-[#d1b79a]/14 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#dbc3aa] focus-visible:ring-offset-2 focus-visible:ring-offset-[#05070b]"
-                >
-                  Open Subject File
-                </Link>
-              </div>
-            </article>
-          </div>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link
+                href="/archive/chapters"
+                className="inline-flex min-h-11 items-center justify-center rounded-sm border border-white/12 bg-white/[0.03] px-5 py-3 text-sm uppercase tracking-[0.24em] text-[#d8cec1] transition hover:border-white/18 hover:bg-white/[0.045] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#dbc3aa] focus-visible:ring-offset-2 focus-visible:ring-offset-[#05070b]"
+              >
+                Return to Records
+              </Link>
+              <Link
+                href="/archive/subject/nm-01"
+                className="inline-flex min-h-11 items-center justify-center rounded-sm border border-[#d1b79a]/28 bg-[#d1b79a]/10 px-5 py-3 text-sm uppercase tracking-[0.24em] text-[#f4ede3] transition hover:border-[#d1b79a]/42 hover:bg-[#d1b79a]/14 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#dbc3aa] focus-visible:ring-offset-2 focus-visible:ring-offset-[#05070b]"
+              >
+                Open Subject File
+              </Link>
+            </div>
+          </article>
         </div>
       </section>
     </main>
