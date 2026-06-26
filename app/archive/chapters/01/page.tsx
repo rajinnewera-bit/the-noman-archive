@@ -2,71 +2,41 @@ import Link from "next/link";
 
 import { ArchivePath } from "@/components/archive-path";
 import {
-  chapter01,
-  type ChapterPage,
-  type ChapterParagraph,
-} from "@/content/chapters/chapter01";
+  getMarkdownChapter,
+  type ChapterLine,
+  type ChapterSegment,
+} from "@/lib/chapters";
 
 const recoveryMetadata = [
   { label: "Recovery Date", value: "22 FEB 2008" },
   { label: "Archive Reference", value: "NM-01 / E-14 / LEDGER-A" },
   { label: "Evidence Tag", value: "RD-01 / PAPER / PARTIAL" },
   { label: "Scan Quality", value: "63% / STABLE ARTIFACTING" },
-  { label: "Ink Degradation", value: "MODERATE TO SEVERE" },
+  { label: "Ink Degradation", value: "UNASSESSED" },
   { label: "Recovery Team", value: "NORTH WING RETRIEVAL UNIT" },
 ] as const;
 
 const evidenceStamps = [
-  ["Recovered", "Partial Scan"],
-  ["Restricted Copy", "Forensic Copy"],
-  ["Authenticity Under Review"],
-] as const;
-
-const marginNotes = {
-  "01-A": [
-    "Ink pressure rises after self-reference.",
-    "Room geometry changes before any explicit naming.",
-  ],
-  "01-B": [
-    "Name occurrence corresponds with scan interference.",
-    "Caller identity omitted from adjacent witness copy.",
-  ],
-  "01-C": [
-    "Direct self-identification increases coherence.",
-    "Final lines remain intact despite lower-edge abrasion.",
-  ],
-} as const;
-
-const interPageRecords = [
-  {
-    after: "01-A",
-    ref: "RECOVERY INTERRUPTION / 01-A",
-    title: "Lower sheet torn during recovery.",
-    body: "The missing line was not restored. Adjacent fibers indicate loss after water damage, before catalog drying.",
-  },
-  {
-    after: "01-B",
-    ref: "FIELD NOTE / 01-B",
-    title: "First direct naming event logged.",
-    body: "Tone coherence rises immediately after self-reference. Review team flagged the section for containment correlation.",
-  },
+  "Recovered",
+  "Partial Scan",
+  "Restricted Copy",
 ] as const;
 
 const archiveAnnotations = [
   {
-    ref: "AN-04",
-    title: "Margin Review",
-    body: "The writer returns to thresholds, doors, and repetitions with increasing instability.",
+    ref: "AN-01",
+    title: "Source Linked",
+    body: "This record is now resolved from a dedicated Markdown chapter source rather than interface code.",
   },
   {
-    ref: "AN-09",
-    title: "Forensic Remark",
-    body: "Material fibers suggest prolonged exposure to moisture before recovery and controlled drying.",
+    ref: "AN-02",
+    title: "Content State",
+    body: "The recovered chapter prose is now loaded from the canonical manuscript source inside the repository.",
   },
   {
-    ref: "AN-12",
-    title: "Handling Warning",
-    body: "Do not narrate the full passage aloud during shared review. Prior sessions produced wording convergence.",
+    ref: "AN-03",
+    title: "Handling Rule",
+    body: "Archive framing remains outside the manuscript. The source file preserves the chapter text and spacing.",
   },
 ] as const;
 
@@ -78,135 +48,54 @@ const readerPath = [
   { label: "Subject File", href: "/archive/subject/nm-01" },
 ] as const;
 
-function RedactionBar({ width }: { width: string }) {
-  return (
-    <span
-      aria-label="redacted"
-      className={`mx-1 inline-block h-[0.9em] ${width} rounded-[2px] bg-[#16110b]/90 align-middle`}
-    />
-  );
+function renderSegments(
+  segments: ChapterSegment[],
+  keyPrefix: string,
+) {
+  return segments.map((segment, index) => {
+    const key = `${keyPrefix}-${index}`;
+
+    if (segment.bold && segment.italic) {
+      return (
+        <strong key={key}>
+          <em>{segment.text}</em>
+        </strong>
+      );
+    }
+
+    if (segment.bold) {
+      return <strong key={key}>{segment.text}</strong>;
+    }
+
+    if (segment.italic) {
+      return <em key={key}>{segment.text}</em>;
+    }
+
+    return <span key={key}>{segment.text}</span>;
+  });
 }
 
-function renderParagraph(paragraph: ChapterParagraph, index: number) {
-  if (paragraph.kind === "text") {
-    return (
-      <p key={`${paragraph.kind}-${index}`}>
-        {paragraph.text}
-      </p>
-    );
-  }
+export default async function RecoveredDiaryPage() {
+  const chapter = await getMarkdownChapter("chapter01");
+  const textLineIndexes = chapter.lines.reduce<number[]>((indexes, line, index) => {
+    if (line.type === "text") {
+      indexes.push(index);
+    }
 
-  return (
-    <p key={`${paragraph.kind}-${index}`}>
-      {paragraph.before}
-      {paragraph.redactions.map((redaction, redactionIndex) => (
-        <RedactionBar
-          key={`${redaction.width}-${redactionIndex}`}
-          width={redaction.width}
-        />
-      ))}
-      {paragraph.after}
-    </p>
-  );
-}
+    return indexes;
+  }, []);
+  const [bookTitleIndex, chapterTitleIndex, subtitleIndex] = textLineIndexes;
+  const bookTitleLine =
+    bookTitleIndex !== undefined ? chapter.lines[bookTitleIndex] : null;
+  const chapterTitleLine =
+    chapterTitleIndex !== undefined ? chapter.lines[chapterTitleIndex] : null;
+  const subtitleLine =
+    subtitleIndex !== undefined ? chapter.lines[subtitleIndex] : null;
+  const bodyLines: ChapterLine[] =
+    subtitleIndex !== undefined
+      ? chapter.lines.slice(subtitleIndex + 1)
+      : chapter.lines;
 
-function NotebookPage({
-  page,
-  pageIndex,
-}: {
-  page: ChapterPage;
-  pageIndex: number;
-}) {
-  const notes = marginNotes[page.id as keyof typeof marginNotes] ?? [];
-  const stamps = evidenceStamps[pageIndex] ?? [];
-
-  return (
-    <article className="relative overflow-hidden rounded-sm border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.045),rgba(255,255,255,0.02))] p-4 shadow-[0_22px_90px_rgba(0,0,0,0.38)] sm:p-6 lg:p-8">
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.4),transparent)]"
-      />
-
-      <div className="relative overflow-hidden rounded-sm border border-[#9b8a74]/24 bg-[linear-gradient(180deg,rgba(222,210,190,0.96),rgba(192,177,156,0.94))] p-5 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06),0_24px_60px_rgba(0,0,0,0.22)] sm:p-7 lg:p-9">
-        <div
-          aria-hidden="true"
-          className="absolute inset-0 bg-[radial-gradient(circle_at_12%_16%,rgba(255,255,255,0.36),transparent_14%),radial-gradient(circle_at_84%_14%,rgba(255,255,255,0.16),transparent_12%),radial-gradient(circle_at_18%_86%,rgba(99,80,58,0.12),transparent_18%),linear-gradient(180deg,rgba(255,255,255,0.18),transparent_18%,rgba(100,82,61,0.08)_100%)]"
-        />
-        <div
-          aria-hidden="true"
-          className="absolute inset-0 opacity-[0.18] bg-[repeating-linear-gradient(180deg,rgba(52,40,29,0.16)_0,rgba(52,40,29,0.16)_1px,transparent_1px,transparent_4px)]"
-        />
-        <div
-          aria-hidden="true"
-          className="absolute inset-y-0 left-0 w-6 bg-[linear-gradient(90deg,rgba(118,96,72,0.3),transparent)]"
-        />
-        <div
-          aria-hidden="true"
-          className="absolute right-0 top-24 h-36 w-8 bg-[linear-gradient(270deg,rgba(87,69,47,0.25),transparent)]"
-        />
-
-        <div className="absolute right-5 top-5 flex flex-col items-end gap-3">
-          {stamps.map((stamp, stampIndex) => (
-            <span
-              key={stamp}
-              className={`rounded-sm border border-[#7d2c2c]/34 bg-[#b57e7e]/10 px-3 py-1 text-[0.64rem] font-semibold uppercase tracking-[0.28em] text-[#6f1d1d]/76 ${
-                stampIndex % 2 === 0 ? "rotate-[6deg]" : "rotate-[-4deg]"
-              }`}
-            >
-              {stamp}
-            </span>
-          ))}
-        </div>
-
-        <div className="relative">
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-dashed border-[#6f5d4a]/24 pb-4 font-mono text-[0.64rem] uppercase tracking-[0.28em] text-[#5f5244]/74">
-            <span>scan sheet / {page.id}</span>
-            <span>evidence marker e-14</span>
-            <span>clerk reference 7c-113</span>
-          </div>
-
-          <div className="mt-6 grid gap-8 lg:grid-cols-[minmax(0,1fr)_13rem]">
-            <div className="space-y-6 text-[0.98rem] leading-8 text-[#2e261c]/82 sm:text-[1.04rem]">
-              {page.paragraphs.map(renderParagraph)}
-            </div>
-
-            <aside className="space-y-4">
-              <div className="rounded-sm border border-[#6f5d4a]/28 bg-white/18 p-4 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)]">
-                <p className="font-mono text-[0.62rem] uppercase tracking-[0.28em] text-[#5f5244]/74">
-                  margin notation / inv. hand
-                </p>
-                <div className="mt-4 space-y-4 text-[0.82rem] italic leading-6 text-[#44372a]/78">
-                  {notes.map((note, noteIndex) => (
-                    <p
-                      key={note}
-                      className={
-                        noteIndex % 2 === 0 ? "rotate-[-2deg]" : "rotate-[1.5deg]"
-                      }
-                    >
-                      {note}
-                    </p>
-                  ))}
-                </div>
-              </div>
-
-              <div className="rounded-sm border border-[#6f5d4a]/28 bg-[#89745c]/10 p-4 font-mono text-[0.66rem] uppercase tracking-[0.28em] text-[#5c4d3f]/78">
-                <p>marker / {page.id}</p>
-                <p className="mt-3 border-t border-dashed border-[#6f5d4a]/24 pt-3">
-                  ref / edge fiber anomaly
-                </p>
-                <p className="mt-3 border-t border-dashed border-[#6f5d4a]/24 pt-3">
-                  ref / line dropout cluster
-                </p>
-              </div>
-            </aside>
-          </div>
-        </div>
-      </div>
-    </article>
-  );
-}
-
-export default function RecoveredDiaryPage() {
   return (
     <main className="relative overflow-hidden bg-[#05070b] text-[#f4efe6]">
       <div
@@ -262,13 +151,14 @@ export default function RecoveredDiaryPage() {
                 Evidence Layer / Notebook Fragment 01
               </p>
               <h1 className="mt-6 text-[2.8rem] font-semibold uppercase tracking-[0.22em] text-[#f7f2ea] sm:text-[4.4rem] md:text-[5.2rem] lg:text-[6.2rem]">
-                {chapter01.title}
+                Recovered Diary
               </h1>
               <p className="mt-5 max-w-2xl text-base uppercase tracking-[0.2em] text-[#d9d0c4] sm:text-lg">
-                Personal writing surfaced within sealed evidence material.
+                Content now resolves from a dedicated archive manuscript file.
               </p>
               <p className="mt-6 max-w-xl text-sm leading-7 text-[#aca293] sm:text-[0.96rem]">
-                Institutional distance ends here. The voice does not.
+                The archive frame remains. The chapter text now lives outside
+                the interface.
               </p>
 
               <div className="mt-8 max-w-2xl">
@@ -277,7 +167,7 @@ export default function RecoveredDiaryPage() {
                   next={{
                     href: "/archive/subject/nm-01",
                     label: "Subject File",
-                    note: "Follow the diary into the dossier it disturbs.",
+                    note: "Continue from the recovered text into the subject file.",
                   }}
                 />
               </div>
@@ -306,33 +196,34 @@ export default function RecoveredDiaryPage() {
                 <div className="space-y-4 py-5">
                   <div className="flex items-baseline justify-between gap-4 border-b border-dashed border-white/10 pb-3">
                     <span className="font-mono text-[0.68rem] uppercase tracking-[0.28em] text-[#8f98a4]">
-                      Page Count
+                      Source File
                     </span>
                     <span className="text-sm uppercase tracking-[0.24em] text-[#dfd5c8]">
-                      03 recovered leaves
+                      chapter01.md
                     </span>
                   </div>
                   <div className="flex items-baseline justify-between gap-4 border-b border-dashed border-white/10 pb-3">
                     <span className="font-mono text-[0.68rem] uppercase tracking-[0.28em] text-[#8f98a4]">
-                      Author Confidence
+                      Content State
                     </span>
                     <span className="text-sm uppercase tracking-[0.24em] text-[#dfd5c8]">
-                      probable
+                      ingested
                     </span>
                   </div>
                   <div className="flex items-baseline justify-between gap-4 border-b border-dashed border-white/10 pb-3">
                     <span className="font-mono text-[0.68rem] uppercase tracking-[0.28em] text-[#8f98a4]">
-                      Emotional Hazard
+                      Layout State
                     </span>
                     <span className="text-sm uppercase tracking-[0.24em] text-[#dfd5c8]">
-                      elevated
+                      ready
                     </span>
                   </div>
                 </div>
 
                 <p className="max-w-sm text-sm leading-7 text-[#b5ab9d]">
-                  The text remains primary. The archive records only its
-                  condition.
+                  The content architecture is active. The recovered manuscript
+                  now enters through the chapter source file without being
+                  embedded in the page component.
                 </p>
               </div>
             </article>
@@ -362,35 +253,90 @@ export default function RecoveredDiaryPage() {
 
       <section className="relative px-6 py-14 sm:px-8 lg:px-12 lg:py-18">
         <div className="mx-auto max-w-7xl space-y-8">
-          {chapter01.pages.map((page, index) => (
-            <div key={page.id} className="space-y-8">
-              <NotebookPage page={page} pageIndex={index} />
+          <article className="relative overflow-hidden rounded-sm border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.045),rgba(255,255,255,0.02))] p-4 shadow-[0_22px_90px_rgba(0,0,0,0.38)] sm:p-6 lg:p-8">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.4),transparent)]"
+            />
 
-              {interPageRecords
-                .filter((record) => record.after === page.id)
-                .map((record) => (
-                  <article
-                    key={record.ref}
-                    className="rounded-sm border border-white/10 bg-white/[0.03] p-5 shadow-[0_14px_50px_rgba(0,0,0,0.24)] sm:p-6"
+            <div className="relative overflow-hidden rounded-sm border border-[#9b8a74]/24 bg-[linear-gradient(180deg,rgba(222,210,190,0.96),rgba(192,177,156,0.94))] p-5 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06),0_24px_60px_rgba(0,0,0,0.22)] sm:p-7 lg:p-9">
+              <div
+                aria-hidden="true"
+                className="absolute inset-0 bg-[radial-gradient(circle_at_12%_16%,rgba(255,255,255,0.36),transparent_14%),radial-gradient(circle_at_84%_14%,rgba(255,255,255,0.16),transparent_12%),radial-gradient(circle_at_18%_86%,rgba(99,80,58,0.12),transparent_18%),linear-gradient(180deg,rgba(255,255,255,0.18),transparent_18%,rgba(100,82,61,0.08)_100%)]"
+              />
+              <div
+                aria-hidden="true"
+                className="absolute inset-0 opacity-[0.18] bg-[repeating-linear-gradient(180deg,rgba(52,40,29,0.16)_0,rgba(52,40,29,0.16)_1px,transparent_1px,transparent_4px)]"
+              />
+              <div
+                aria-hidden="true"
+                className="absolute inset-y-0 left-0 w-6 bg-[linear-gradient(90deg,rgba(118,96,72,0.3),transparent)]"
+              />
+
+              <div className="absolute right-5 top-5 flex flex-col items-end gap-3">
+                {evidenceStamps.map((stamp, index) => (
+                  <span
+                    key={stamp}
+                    className={`rounded-sm border px-3 py-1 text-[0.66rem] font-semibold uppercase tracking-[0.28em] text-[#6f1d1d]/78 ${
+                      index % 2 === 0
+                        ? "rotate-[6deg] border-[#7d2c2c]/40 bg-[#b57e7e]/10"
+                        : "rotate-[-4deg] border-[#7d2c2c]/30 bg-[#b57e7e]/8"
+                    }`}
                   >
-                    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-dashed border-white/10 pb-4">
-                      <p className="font-mono text-[0.66rem] uppercase tracking-[0.28em] text-[#8f98a4]">
-                        {record.ref}
-                      </p>
-                      <p className="font-mono text-[0.66rem] uppercase tracking-[0.28em] text-[#8e8172]">
-                        archive note
-                      </p>
-                    </div>
-                    <p className="mt-4 text-sm uppercase tracking-[0.2em] text-[#e1d7ca]">
-                      {record.title}
-                    </p>
-                    <p className="mt-3 text-sm leading-7 text-[#b7ae9f]">
-                      {record.body}
-                    </p>
-                  </article>
+                    {stamp}
+                  </span>
                 ))}
+              </div>
+
+              <div className="relative">
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-dashed border-[#6f5d4a]/24 pb-4 font-mono text-[0.64rem] uppercase tracking-[0.28em] text-[#5f5244]/74">
+                  <span>scan sheet / 01-a</span>
+                  <span>evidence marker e-14</span>
+                  <span>source / content/chapters/chapter01.md</span>
+                </div>
+
+                <div className="mt-10">
+                  {bookTitleLine && bookTitleLine.type === "text" ? (
+                    <p className="text-center font-mono text-[0.78rem] uppercase tracking-[0.34em] text-[#4d4032]/72">
+                      {renderSegments(bookTitleLine.segments, "book-title")}
+                    </p>
+                  ) : null}
+
+                  {chapterTitleLine && chapterTitleLine.type === "text" ? (
+                    <h2 className="mt-5 text-center text-[2.3rem] font-semibold uppercase tracking-[0.18em] text-[#2d261c]/86 sm:text-[3rem]">
+                      {renderSegments(chapterTitleLine.segments, "chapter-title")}
+                    </h2>
+                  ) : null}
+
+                  {subtitleLine && subtitleLine.type === "text" ? (
+                    <p className="mt-5 text-center text-[1.05rem] leading-8 text-[#46392b]/80 sm:text-[1.12rem]">
+                      {renderSegments(subtitleLine.segments, "chapter-subtitle")}
+                    </p>
+                  ) : null}
+
+                  <div className="mt-8 text-left text-[1.02rem] leading-8 text-[#2e261c]/82 sm:text-[1.08rem]">
+                    {bodyLines.map((line, index) =>
+                      line.type === "blank" ? (
+                        <div
+                          key={`blank-${index}`}
+                          aria-hidden="true"
+                          className="h-6 sm:h-7"
+                        />
+                      ) : (
+                        <p key={`line-${index}`}>
+                          {renderSegments(line.segments, `line-${index}`)}
+                        </p>
+                      ),
+                    )}
+                  </div>
+                </div>
+
+                <div className="mt-10 border-t border-dashed border-[#6f5d4a]/24 pt-4 font-mono text-[0.66rem] uppercase tracking-[0.28em] text-[#5f5244]/72">
+                  content source loaded successfully
+                </div>
+              </div>
             </div>
-          ))}
+          </article>
         </div>
       </section>
 
@@ -401,7 +347,7 @@ export default function RecoveredDiaryPage() {
               Archive Annotations
             </p>
             <h2 className="mt-4 text-2xl font-semibold text-[#f3ede4] sm:text-3xl">
-              Commentary remains external to the text.
+              The interface now stands apart from the chapter text.
             </h2>
             <div className="mt-6 space-y-4">
               {archiveAnnotations.map((note) => (
@@ -435,8 +381,8 @@ export default function RecoveredDiaryPage() {
               </p>
             </div>
             <p className="pt-5 text-sm leading-7 text-[#b9b0a2] sm:text-[0.97rem]">
-              This material is preserved as evidence. The prose remains
-              untouched.
+              The manuscript remains in the chapter file. The archive layer
+              continues to frame it without rewriting it.
             </p>
 
             <div className="mt-8 flex flex-wrap gap-3">
