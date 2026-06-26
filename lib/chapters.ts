@@ -1,4 +1,4 @@
-import { readFile } from "node:fs/promises";
+import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 
 export type ChapterSegment = {
@@ -20,6 +20,8 @@ export type ChapterLine =
 export type MarkdownChapter = {
   lines: ChapterLine[];
 };
+
+const chapterFilePattern = /^chapter(\d+)\.md$/;
 
 const inlineTokenPattern = /(\*\*\*[^*]+\*\*\*|\*\*[^*]+\*\*|\*[^*]+\*)/g;
 
@@ -97,4 +99,44 @@ export async function getMarkdownChapter(slug: string): Promise<MarkdownChapter>
           },
     ),
   };
+}
+
+export function normalizeChapterId(chapterId: string): string | null {
+  if (!/^\d+$/.test(chapterId)) {
+    return null;
+  }
+
+  return chapterId.padStart(2, "0");
+}
+
+export function chapterIdToSlug(chapterId: string): string {
+  const normalized = normalizeChapterId(chapterId);
+
+  if (!normalized) {
+    throw new Error(`Invalid chapter id: ${chapterId}`);
+  }
+
+  return `chapter${normalized}`;
+}
+
+export async function listAvailableChapterIds(): Promise<string[]> {
+  const chaptersDirectory = path.join(process.cwd(), "content", "chapters");
+  const entries = await readdir(chaptersDirectory, { withFileTypes: true });
+
+  return entries
+    .filter((entry) => entry.isFile())
+    .map((entry) => entry.name.match(chapterFilePattern)?.[1] ?? null)
+    .filter((chapterId): chapterId is string => chapterId !== null)
+    .sort((left, right) => Number(left) - Number(right));
+}
+
+export function isMissingChapterError(
+  error: unknown,
+): error is NodeJS.ErrnoException {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    error.code === "ENOENT"
+  );
 }
