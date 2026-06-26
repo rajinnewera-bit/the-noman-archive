@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { ArchivePath } from "@/components/archive-path";
+
 const recoveryMetadata = [
   { label: "Recovery Date", value: "22 FEB 2008" },
   { label: "Archive Reference", value: "NM-01 / E-14 / LEDGER-A" },
@@ -42,6 +44,14 @@ const archiveAnnotations = [
     title: "Handling Warning",
     body: "Do not narrate the full passage aloud during shared review. Prior sessions produced wording convergence.",
   },
+] as const;
+
+const readerPath = [
+  { label: "Home", href: "/" },
+  { label: "Archive", href: "/archive" },
+  { label: "Chapter Records", href: "/archive/chapters" },
+  { label: "Recovered Diary", href: "/archive/chapters/01", active: true },
+  { label: "Subject File", href: "/archive/subject/nm-01" },
 ] as const;
 
 function RedactionBar({ width }: { width: string }) {
@@ -115,10 +125,19 @@ export default function RecoveredDiaryPage() {
                 Personal writing surfaced within sealed evidence material.
               </p>
               <p className="mt-6 max-w-xl text-sm leading-7 text-[#aca293] sm:text-[0.96rem]">
-                Institutional records stop here. What follows is damaged,
-                partial, and uncomfortably close to the original hand that put
-                it on paper.
+                Institutional distance ends here. The voice does not.
               </p>
+
+              <div className="mt-8 max-w-2xl">
+                <ArchivePath
+                  steps={readerPath}
+                  next={{
+                    href: "/archive/subject/nm-01",
+                    label: "Subject File",
+                    note: "Follow the diary into the dossier it disturbs.",
+                  }}
+                />
+              </div>
             </div>
 
             <article className="relative overflow-hidden rounded-sm border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.015))] p-5 shadow-[0_18px_80px_rgba(0,0,0,0.35)] sm:p-6">
@@ -169,9 +188,8 @@ export default function RecoveredDiaryPage() {
                 </div>
 
                 <p className="max-w-sm text-sm leading-7 text-[#b5ab9d]">
-                  First-person language survives in concentrated pockets. Later
-                  review notes suggest direct exposure alters how surrounding
-                  records describe the same events.
+                  First-person language survives. The surrounding archive bends
+                  around it.
                 </p>
               </div>
             </article>
@@ -461,9 +479,9 @@ export default function RecoveredDiaryPage() {
               <p className="font-mono text-[0.7rem] uppercase tracking-[0.34em] text-[#8f98a4]">
                 Archive Annotations
               </p>
-              <h2 className="mt-4 text-2xl font-semibold text-[#f3ede4] sm:text-3xl">
-                Review notes cluster around the voice itself.
-              </h2>
+            <h2 className="mt-4 text-2xl font-semibold text-[#f3ede4] sm:text-3xl">
+              Review notes cluster around the voice itself.
+            </h2>
               <div className="mt-6 space-y-4">
                 {archiveAnnotations.map((note) => (
                   <article
@@ -496,9 +514,7 @@ export default function RecoveredDiaryPage() {
                 </p>
               </div>
               <p className="pt-5 text-sm leading-7 text-[#b9b0a2] sm:text-[0.97rem]">
-                This material is the first recovered source to speak from
-                inside the event rather than around it. Continued review is
-                permitted under limited exposure protocols only.
+                This is the first source that speaks from inside the event.
               </p>
 
               <div className="mt-8 flex flex-wrap gap-3">
@@ -512,7 +528,7 @@ export default function RecoveredDiaryPage() {
                   href="/archive/subject/nm-01"
                   className="inline-flex min-h-11 items-center justify-center rounded-sm border border-[#d1b79a]/28 bg-[#d1b79a]/10 px-5 py-3 text-sm uppercase tracking-[0.24em] text-[#f4ede3] transition hover:border-[#d1b79a]/42 hover:bg-[#d1b79a]/14 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#dbc3aa] focus-visible:ring-offset-2 focus-visible:ring-offset-[#05070b]"
                 >
-                  Back to Subject File
+                  Open Subject File
                 </Link>
               </div>
             </article>

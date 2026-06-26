@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { ArchivePath } from "@/components/archive-path";
+
 const dossierCards = [
   {
     index: "01",
@@ -55,6 +57,14 @@ const recoveredPanels = [
     stamp: "RECORD 31 / ANOMALY",
     body: "No direct image survives intact. Only impressions remain: a corridor, a door, a voice returning where it should not.",
   },
+] as const;
+
+const readerPath = [
+  { label: "Home", href: "/", active: true },
+  { label: "Archive", href: "/archive" },
+  { label: "Chapter Records", href: "/archive/chapters" },
+  { label: "Recovered Diary", href: "/archive/chapters/01" },
+  { label: "Subject File", href: "/archive/subject/nm-01" },
 ] as const;
 
 export default function HomePage() {
@@ -132,6 +142,17 @@ export default function HomePage() {
                   Inspect Dossier
                 </a>
               </div>
+
+              <div className="mt-8 max-w-2xl">
+                <ArchivePath
+                  steps={readerPath}
+                  next={{
+                    href: "/archive",
+                    label: "Archive",
+                    note: "Begin with the visible record.",
+                  }}
+                />
+              </div>
             </div>
 
             <article className="relative overflow-hidden rounded-sm border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.015))] p-5 shadow-[0_18px_80px_rgba(0,0,0,0.35)] sm:p-6">
@@ -182,8 +203,7 @@ export default function HomePage() {
                 </div>
 
                 <p className="max-w-sm text-sm leading-7 text-[#b5ab9d]">
-                  Repetition of the name produces discontinuities across all
-                  surviving records. Continue review with caution.
+                  The name destabilizes the record. Continue carefully.
                 </p>
               </div>
             </article>
@@ -241,7 +261,7 @@ export default function HomePage() {
               </h2>
             </div>
             <p className="max-w-md text-sm uppercase tracking-[0.22em] text-[#a59c8f]">
-              Six verified fields remain visible without full clearance.
+              Six visible fields. Nothing complete.
             </p>
           </div>
 

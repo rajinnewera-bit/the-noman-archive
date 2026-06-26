@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { ArchivePath } from "@/components/archive-path";
+
 const identityRecords = [
   { label: "Name", value: "Noman" },
   { label: "Age", value: "Unknown" },
@@ -118,6 +120,14 @@ const observerNotes = [
   "The subject does not stabilize under scrutiny. The archive degrades around the point of certainty.",
 ] as const;
 
+const readerPath = [
+  { label: "Home", href: "/" },
+  { label: "Archive", href: "/archive" },
+  { label: "Chapter Records", href: "/archive/chapters" },
+  { label: "Recovered Diary", href: "/archive/chapters/01" },
+  { label: "Subject File", href: "/archive/subject/nm-01", active: true },
+] as const;
+
 export default function SubjectFilePage() {
   return (
     <main className="relative overflow-hidden bg-[#05070b] text-[#f4efe6]">
@@ -180,10 +190,12 @@ export default function SubjectFilePage() {
                 Primary subject classification confirmed. Identity remains unstable.
               </p>
               <p className="mt-6 max-w-lg text-sm leading-7 text-[#aca293] sm:text-[0.96rem]">
-                This dossier aggregates surviving identity markers, assessment
-                records, investigation chronology, and evidence custody notes
-                related to the subject known as Noman.
+                The archive stops observing from a distance here.
               </p>
+
+              <div className="mt-8 max-w-2xl">
+                <ArchivePath steps={readerPath} />
+              </div>
             </div>
 
             <article className="relative overflow-hidden rounded-sm border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.015))] p-5 shadow-[0_18px_80px_rgba(0,0,0,0.35)] sm:p-6">
@@ -234,9 +246,7 @@ export default function SubjectFilePage() {
                 </div>
 
                 <p className="max-w-sm text-sm leading-7 text-[#b5ab9d]">
-                  Repeated dossier contact correlates with wording convergence,
-                  timestamp drift, and record contamination across unrelated
-                  evidence sets.
+                  Repeated review causes drift across unrelated records.
                 </p>
               </div>
             </article>
@@ -330,7 +340,7 @@ export default function SubjectFilePage() {
               </h2>
             </div>
             <p className="max-w-md text-sm uppercase tracking-[0.22em] text-[#a59c8f]">
-              Review prepared for restricted internal circulation.
+              Review preserved. Certainty withheld.
             </p>
           </div>
 
@@ -506,9 +516,8 @@ export default function SubjectFilePage() {
               </p>
             </div>
             <p className="pt-5 text-sm leading-7 text-[#b9b0a2] sm:text-[0.97rem]">
-              Archive staff are advised to log wording drift immediately,
-              discontinue prolonged review sessions, and avoid repeating the
-              subject designation aloud within shared record environments.
+              Log wording drift. End prolonged review. Do not repeat the name
+              aloud.
             </p>
 
             <div className="mt-8">
@@ -516,7 +525,7 @@ export default function SubjectFilePage() {
                 href="/archive/chapters/01"
                 className="inline-flex min-h-12 items-center justify-center rounded-sm border border-[#d1b79a]/45 bg-[#d1b79a]/12 px-6 py-3 text-sm font-medium uppercase tracking-[0.28em] text-[#f8f3eb] transition duration-200 ease-out hover:border-[#d1b79a]/70 hover:bg-[#d1b79a]/18 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#dbc3aa] focus-visible:ring-offset-2 focus-visible:ring-offset-[#05070b]"
               >
-                Open Recovered Diary
+                Return to Recovered Diary
               </Link>
             </div>
           </article>

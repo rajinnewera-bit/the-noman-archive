@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { ArchivePath } from "@/components/archive-path";
+
 const archiveCollections = [
   {
     id: "01",
@@ -94,9 +96,17 @@ const archiveCollections = [
 ] as const;
 
 const manifestNotes = [
-  "Observer access permits inspection of structure only.",
-  "Unsealed collections will appear as record integrity improves.",
-  "Not all absences are accidental.",
+  "Observer view only.",
+  "Unsealed collections surface as integrity improves.",
+  "Some absences are deliberate.",
+] as const;
+
+const readerPath = [
+  { label: "Home", href: "/" },
+  { label: "Archive", href: "/archive", active: true },
+  { label: "Chapter Records", href: "/archive/chapters" },
+  { label: "Recovered Diary", href: "/archive/chapters/01" },
+  { label: "Subject File", href: "/archive/subject/nm-01" },
 ] as const;
 
 export default function ArchiveIndexPage() {
@@ -161,10 +171,19 @@ export default function ArchiveIndexPage() {
                 Six collections detected. Full recovery not authorized.
               </p>
               <p className="mt-6 max-w-lg text-sm leading-7 text-[#aca293] sm:text-[0.96rem]">
-                Access is limited to surface classification, containment
-                status, and record integrity. Internal collections remain
-                partially sealed.
+                Surface classification only. Deeper layers remain sealed.
               </p>
+
+              <div className="mt-8 max-w-2xl">
+                <ArchivePath
+                  steps={readerPath}
+                  next={{
+                    href: "/archive/chapters",
+                    label: "Chapter Records",
+                    note: "The reader path enters through the opening sequence.",
+                  }}
+                />
+              </div>
             </div>
 
             <article className="relative overflow-hidden rounded-sm border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.015))] p-5 shadow-[0_18px_80px_rgba(0,0,0,0.35)] sm:p-6">
@@ -215,8 +234,7 @@ export default function ArchiveIndexPage() {
                 </div>
 
                 <p className="max-w-sm text-sm leading-7 text-[#b5ab9d]">
-                  The index is visible. The contents are not fully permitted.
-                  Continue under observer limitations.
+                  The index is visible. The contents are not.
                 </p>
               </div>
             </article>
@@ -236,7 +254,7 @@ export default function ArchiveIndexPage() {
               </h2>
             </div>
             <p className="max-w-md text-sm uppercase tracking-[0.22em] text-[#a59c8f]">
-              Manifest visible. Content access remains conditional.
+              Start with Chapter Records. The rest stays partial.
             </p>
           </div>
 

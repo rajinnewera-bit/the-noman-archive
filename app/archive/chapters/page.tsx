@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+import { ArchivePath } from "@/components/archive-path";
+
 type OverlayRecord = {
   eyebrow: string;
   title: string;
@@ -62,6 +64,14 @@ const chapterRecords: readonly ChapterRecord[] = [
       ],
     },
   },
+] as const;
+
+const readerPath = [
+  { label: "Home", href: "/" },
+  { label: "Archive", href: "/archive" },
+  { label: "Chapter Records", href: "/archive/chapters", active: true },
+  { label: "Recovered Diary", href: "/archive/chapters/01" },
+  { label: "Subject File", href: "/archive/subject/nm-01" },
 ] as const;
 
 function ChapterOverlay({
@@ -228,10 +238,20 @@ export default function ChapterRecordsPage() {
                   Indexed entries detected. Reading clearance not yet granted.
                 </p>
                 <p className="mt-6 max-w-lg text-sm leading-7 text-[#aca293] sm:text-[0.96rem]">
-                  This layer catalogs narrative records as controlled evidence,
-                  not published chapters. Surviving entries remain sealed,
-                  delayed, or partially visible.
+                  Story records appear here as controlled evidence. Only one
+                  record opens.
                 </p>
+
+                <div className="mt-8 max-w-2xl">
+                  <ArchivePath
+                    steps={readerPath}
+                    next={{
+                      href: "/archive/chapters/01",
+                      label: "Recovered Diary",
+                      note: "Chapter 01 is the first readable surface.",
+                    }}
+                  />
+                </div>
               </div>
 
               <article className="relative overflow-hidden rounded-sm border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.015))] p-5 shadow-[0_18px_80px_rgba(0,0,0,0.35)] sm:p-6">
@@ -282,8 +302,7 @@ export default function ChapterRecordsPage() {
                   </div>
 
                   <p className="max-w-sm text-sm leading-7 text-[#b5ab9d]">
-                    Opening sequence presence is confirmed. Full reading access
-                    remains suspended pending internal release.
+                    The opening record is present. The rest remains sealed.
                   </p>
                 </div>
               </article>
@@ -303,7 +322,7 @@ export default function ChapterRecordsPage() {
                 </h2>
               </div>
               <p className="max-w-md text-sm uppercase tracking-[0.22em] text-[#a59c8f]">
-                Records verified. Reading access remains restricted.
+                Open Chapter 01 to continue the reader path.
               </p>
             </div>
 
@@ -400,20 +419,17 @@ export default function ChapterRecordsPage() {
               <p className="font-mono text-[0.7rem] uppercase tracking-[0.34em] text-[#8f98a4]">
                 Release Notice
               </p>
-              <h2 className="mt-4 text-2xl font-semibold text-[#f3ede4] sm:text-3xl">
-                Reader route not yet authorized.
-              </h2>
-              <div className="mt-6 space-y-5 text-sm leading-7 text-[#b8aea0]">
-                <p>
-                  These entries are exposed as record shells only. Their internal
-                  sequence has been confirmed, but narrative access is still
-                  withheld from observer clearance.
-                </p>
-                <p>
-                  Chapter 01 remains the only partially surfaced file in the
-                  visible set.
-                </p>
-              </div>
+            <h2 className="mt-4 text-2xl font-semibold text-[#f3ede4] sm:text-3xl">
+              One record opens. Two remain closed.
+            </h2>
+            <div className="mt-6 space-y-5 text-sm leading-7 text-[#b8aea0]">
+              <p>
+                These files are catalog entries first, chapters second.
+              </p>
+              <p>
+                Chapter 01 is the only visible opening.
+              </p>
+            </div>
             </article>
 
             <article className="rounded-sm border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.016))] p-6 sm:p-8">
@@ -444,8 +460,7 @@ export default function ChapterRecordsPage() {
                 </div>
               </div>
               <p className="pt-5 text-sm leading-7 text-[#b9b0a2] sm:text-[0.97rem]">
-                Sequential story records are being prepared as controlled archive
-                material. Public-facing reading surfaces have not been opened.
+                Follow the visible sequence. Do not expect full release.
               </p>
             </article>
           </div>
