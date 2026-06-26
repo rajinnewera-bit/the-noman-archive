@@ -9,6 +9,12 @@ const archiveCollections = [
     detail: "Sequential files exist, but several opening records remain sealed.",
     meta: "12 indexed / 03 withheld",
     href: "/archive/chapters",
+    signal: "Sequential Files",
+    accentBorder: "border-[#b89a78]/18",
+    accentGlow:
+      "bg-[radial-gradient(circle_at_14%_16%,rgba(184,154,120,0.14),transparent_34%)]",
+    accentLine: "bg-[#b89a78]/55",
+    accentLabel: "text-[#d9c1a8]",
   },
   {
     id: "02",
@@ -18,6 +24,12 @@ const archiveCollections = [
     detail: "Loose excerpts, voice remnants, and incomplete field notes remain under review.",
     meta: "31 fragments / unstable chronology",
     href: null,
+    signal: "Loose Excerpts",
+    accentBorder: "border-[#8e9baa]/16",
+    accentGlow:
+      "bg-[radial-gradient(circle_at_16%_14%,rgba(118,136,158,0.12),transparent_34%)]",
+    accentLine: "bg-[#7e8ea2]/52",
+    accentLabel: "text-[#c5d0dc]",
   },
   {
     id: "03",
@@ -27,6 +39,12 @@ const archiveCollections = [
     detail: "One confidential subject file has surfaced; broader identity records remain restricted.",
     meta: "01 file visible / others redacted",
     href: "/archive/subject/nm-01",
+    signal: "Identity Files",
+    accentBorder: "border-[#a48f78]/18",
+    accentGlow:
+      "bg-[radial-gradient(circle_at_16%_16%,rgba(164,143,120,0.14),transparent_34%)]",
+    accentLine: "bg-[#b9a188]/55",
+    accentLabel: "text-[#dcc8b3]",
   },
   {
     id: "04",
@@ -36,6 +54,12 @@ const archiveCollections = [
     detail: "Temporal reconstruction is incomplete. Several events repeat across conflicting dates.",
     meta: "Chronology rebuild in progress",
     href: null,
+    signal: "Chronology Layer",
+    accentBorder: "border-[#7d8e8d]/16",
+    accentGlow:
+      "bg-[radial-gradient(circle_at_16%_14%,rgba(112,130,128,0.12),transparent_34%)]",
+    accentLine: "bg-[#7f9996]/50",
+    accentLabel: "text-[#bfd1ce]",
   },
   {
     id: "05",
@@ -45,6 +69,12 @@ const archiveCollections = [
     detail: "Physical records, transcripts, and anomaly traces require elevated review.",
     meta: "17 exhibits / restricted circulation",
     href: null,
+    signal: "Physical Exhibits",
+    accentBorder: "border-[#8d7a68]/16",
+    accentGlow:
+      "bg-[radial-gradient(circle_at_14%_14%,rgba(141,122,104,0.12),transparent_34%)]",
+    accentLine: "bg-[#a68a73]/48",
+    accentLabel: "text-[#d2bfaf]",
   },
   {
     id: "06",
@@ -54,6 +84,12 @@ const archiveCollections = [
     detail: "Catalog references survive, but the original files do not. Cause remains unresolved.",
     meta: "08 gaps / source missing",
     href: null,
+    signal: "Absent Material",
+    accentBorder: "border-[#9a7b7b]/18",
+    accentGlow:
+      "bg-[radial-gradient(circle_at_16%_14%,rgba(154,123,123,0.12),transparent_34%)]",
+    accentLine: "bg-[#b18686]/52",
+    accentLabel: "text-[#e0c1c1]",
   },
 ] as const;
 
@@ -210,66 +246,106 @@ export default function ArchiveIndexPage() {
                 <Link
                   key={collection.title}
                   href={collection.href}
-                  className="group relative overflow-hidden rounded-sm border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.045),rgba(255,255,255,0.02))] p-5 shadow-[0_10px_40px_rgba(0,0,0,0.22)] transition duration-300 ease-out hover:border-white/16 hover:bg-white/[0.045] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#dbc3aa] focus-visible:ring-offset-2 focus-visible:ring-offset-[#05070b]"
+                  className={`group relative overflow-hidden rounded-sm border bg-[linear-gradient(180deg,rgba(255,255,255,0.045),rgba(255,255,255,0.02))] p-5 shadow-[0_10px_40px_rgba(0,0,0,0.22)] transition duration-300 ease-out hover:border-white/16 hover:bg-white/[0.045] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#dbc3aa] focus-visible:ring-offset-2 focus-visible:ring-offset-[#05070b] ${collection.accentBorder}`}
                 >
                   <div
                     aria-hidden="true"
                     className="pointer-events-none absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.38),transparent)] opacity-60"
                   />
-                  <div className="flex items-start justify-between gap-4">
-                    <p className="font-mono text-[0.7rem] uppercase tracking-[0.3em] text-[#8f98a4]">
-                      {collection.title}
+                  <div
+                    aria-hidden="true"
+                    className={`pointer-events-none absolute inset-0 opacity-100 transition-opacity duration-300 group-hover:opacity-90 ${collection.accentGlow}`}
+                  />
+                  <div
+                    aria-hidden="true"
+                    className={`pointer-events-none absolute left-5 top-5 h-10 w-px ${collection.accentLine}`}
+                  />
+                  <div className="relative flex h-full flex-col">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="space-y-3">
+                        <p className={`font-mono text-[0.66rem] uppercase tracking-[0.3em] ${collection.accentLabel}`}>
+                          {collection.signal}
+                        </p>
+                        <h3 className="max-w-[13ch] text-[1.65rem] font-semibold uppercase leading-[1.08] tracking-[0.14em] text-[#f3ede4] sm:text-[1.92rem]">
+                          {collection.title}
+                        </h3>
+                      </div>
+                      <span className="rounded-sm border border-white/10 bg-white/[0.03] px-2.5 py-1 font-mono text-[0.68rem] uppercase tracking-[0.3em] text-[#8e8172]">
+                        {collection.id}
+                      </span>
+                    </div>
+
+                    <div className="mt-6 flex flex-wrap gap-2">
+                      <span className="inline-flex min-h-8 items-center rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5 font-mono text-[0.65rem] uppercase tracking-[0.28em] text-[#d8cfc3]">
+                        {collection.status}
+                      </span>
+                      <span className="inline-flex min-h-8 items-center rounded-full border border-white/8 px-3 py-1.5 font-mono text-[0.65rem] uppercase tracking-[0.28em] text-[#a99f92]">
+                        {collection.availability}
+                      </span>
+                    </div>
+
+                    <p className="mt-5 flex-1 text-sm leading-7 text-[#b7ae9f]">
+                      {collection.detail}
                     </p>
-                    <span className="font-mono text-[0.68rem] uppercase tracking-[0.3em] text-[#8e8172]">
-                      {collection.id}
-                    </span>
-                  </div>
-                  <p className="mt-5 text-lg font-medium uppercase tracking-[0.18em] text-[#f1eadf] sm:text-xl">
-                    {collection.status}
-                  </p>
-                  <p className="mt-2 font-mono text-[0.68rem] uppercase tracking-[0.3em] text-[#b7ad9f]">
-                    {collection.availability}
-                  </p>
-                  <p className="mt-4 text-sm leading-7 text-[#b7ae9f]">
-                    {collection.detail}
-                  </p>
-                  <div className="mt-6 flex items-center justify-between gap-4 border-t border-dashed border-white/10 pt-4">
-                    <span className="font-mono text-[0.68rem] uppercase tracking-[0.28em] text-[#8f98a4]">
-                      {collection.meta}
-                    </span>
-                    <span className="font-mono text-[0.68rem] uppercase tracking-[0.28em] text-[#d7cec2]">
-                      Inspect
-                    </span>
+
+                    <div className="mt-6 flex items-center justify-between gap-4 border-t border-dashed border-white/10 pt-4">
+                      <span className="font-mono text-[0.68rem] uppercase tracking-[0.28em] text-[#8f98a4]">
+                        {collection.meta}
+                      </span>
+                      <span className="font-mono text-[0.68rem] uppercase tracking-[0.28em] text-[#d7cec2]">
+                        Inspect
+                      </span>
+                    </div>
                   </div>
                 </Link>
               ) : (
                 <article
                   key={collection.title}
-                  className="group relative overflow-hidden rounded-sm border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.045),rgba(255,255,255,0.02))] p-5 shadow-[0_10px_40px_rgba(0,0,0,0.22)] transition duration-300 ease-out hover:border-white/16 hover:bg-white/[0.045]"
+                  className={`group relative overflow-hidden rounded-sm border bg-[linear-gradient(180deg,rgba(255,255,255,0.045),rgba(255,255,255,0.02))] p-5 shadow-[0_10px_40px_rgba(0,0,0,0.22)] transition duration-300 ease-out hover:border-white/16 hover:bg-white/[0.045] ${collection.accentBorder}`}
                 >
                   <div
                     aria-hidden="true"
                     className="pointer-events-none absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.38),transparent)] opacity-60"
                   />
-                  <div className="flex items-start justify-between gap-4">
-                    <p className="font-mono text-[0.7rem] uppercase tracking-[0.3em] text-[#8f98a4]">
-                      {collection.title}
+                  <div
+                    aria-hidden="true"
+                    className={`pointer-events-none absolute inset-0 opacity-100 transition-opacity duration-300 group-hover:opacity-90 ${collection.accentGlow}`}
+                  />
+                  <div
+                    aria-hidden="true"
+                    className={`pointer-events-none absolute left-5 top-5 h-10 w-px ${collection.accentLine}`}
+                  />
+                  <div className="relative flex h-full flex-col">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="space-y-3">
+                        <p className={`font-mono text-[0.66rem] uppercase tracking-[0.3em] ${collection.accentLabel}`}>
+                          {collection.signal}
+                        </p>
+                        <h3 className="max-w-[13ch] text-[1.65rem] font-semibold uppercase leading-[1.08] tracking-[0.14em] text-[#f3ede4] sm:text-[1.92rem]">
+                          {collection.title}
+                        </h3>
+                      </div>
+                      <span className="rounded-sm border border-white/10 bg-white/[0.03] px-2.5 py-1 font-mono text-[0.68rem] uppercase tracking-[0.3em] text-[#8e8172]">
+                        {collection.id}
+                      </span>
+                    </div>
+
+                    <div className="mt-6 flex flex-wrap gap-2">
+                      <span className="inline-flex min-h-8 items-center rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5 font-mono text-[0.65rem] uppercase tracking-[0.28em] text-[#d8cfc3]">
+                        {collection.status}
+                      </span>
+                      <span className="inline-flex min-h-8 items-center rounded-full border border-white/8 px-3 py-1.5 font-mono text-[0.65rem] uppercase tracking-[0.28em] text-[#a99f92]">
+                        {collection.availability}
+                      </span>
+                    </div>
+
+                    <p className="mt-5 flex-1 text-sm leading-7 text-[#b7ae9f]">
+                      {collection.detail}
                     </p>
-                    <span className="font-mono text-[0.68rem] uppercase tracking-[0.3em] text-[#8e8172]">
-                      {collection.id}
-                    </span>
-                  </div>
-                  <p className="mt-5 text-lg font-medium uppercase tracking-[0.18em] text-[#f1eadf] sm:text-xl">
-                    {collection.status}
-                  </p>
-                  <p className="mt-2 font-mono text-[0.68rem] uppercase tracking-[0.3em] text-[#b7ad9f]">
-                    {collection.availability}
-                  </p>
-                  <p className="mt-4 text-sm leading-7 text-[#b7ae9f]">
-                    {collection.detail}
-                  </p>
-                  <div className="mt-6 border-t border-dashed border-white/10 pt-4 font-mono text-[0.68rem] uppercase tracking-[0.28em] text-[#8f98a4]">
-                    {collection.meta}
+
+                    <div className="mt-6 border-t border-dashed border-white/10 pt-4 font-mono text-[0.68rem] uppercase tracking-[0.28em] text-[#8f98a4]">
+                      {collection.meta}
+                    </div>
                   </div>
                 </article>
               )
